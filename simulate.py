@@ -1,7 +1,8 @@
 import numpy as np
-from utils import orginal_utility,allocate_1,\
+from utils import orginal_utility,algorithm_one,\
     max_allocatin,min_allocation,optimal_allocation,pricing_allocation,\
-    flow_restrict_allocation
+    flow_restrict_allocation,square_root_utility,get_square_root_usage,\
+    get_demmand,diff_utility
 import matplotlib.pyplot as plt
 
 
@@ -113,6 +114,81 @@ def test_supply_restrict_allocation():
     theta2s=np.arange(1,100,1)
     for theta2 in theta2s:
         pass
+
+
+def test_square_root_utility():
+    N=3
+    H_0=200
+    h=30
+    A=100
+    prices=np.arange(0.1,1.5,0.01)
+    uts=[]
+    for p in prices:
+        demmand = 1/(4*p**2)
+        # usages=get_square_root_usage(demmand,H_0,N,h,A)
+        usages=algorithm_one(H_0,A,h,[demmand]*N)
+        utility = np.sum([square_root_utility(x) for x in usages])
+        uts.append(utility)
+    plt.plot(prices,uts)
+    plt.show()
+
+
+def test_fig18():
+    H_0=130
+    h=30
+    A=100
+    ns=np.arange(10,110,10)
+    prices=np.arange(0.1,20,0.1)
+    aa=[]
+    bb=[]
+    for n in ns:
+        uts = []
+        for p in prices:
+            demmand = 1 / (4 * p ** 2)
+            # usages=get_square_root_usage(demmand,H_0,N,h,A)
+            usages = algorithm_one(H_0, A, h, [demmand] * n)
+            utility = np.sum([square_root_utility(x) for x in usages])
+            uts.append(utility)
+        SW_p=max(uts)
+        ##SW_s
+        SW_s=((H_0-h)/A)**(1/4)
+        aa.append(SW_p)
+        bb.append(SW_s)
+        print(aa)
+        print(bb)
+    plt.plot(ns,np.array(aa)/np.array(bb))
+    plt.show()
+
+
+
+
+
+def test_diff_utility():
+    N = 5
+    H_0 = 200
+    h = 30
+    A = 100
+    prices = np.arange(0.1, .8, 0.01)
+    cases=['sqrt','sqrt3','sqrt4','sqrt5','log']
+    uts = [[] for i in range(len((cases)))]
+    for p in prices:
+        # demmand = 1 / (4 * p ** 2)
+        for i,case in enumerate(cases):
+            demmand = get_demmand(case,p)
+            # usages=get_square_root_usage(demmand,H_0,N,h,A)
+            usages = algorithm_one(H_0, A, h, [demmand] * N)
+            utility = np.sum([diff_utility(case,x) for x in usages])
+            uts[i].append(utility)
+    for i in range(len(uts)):
+        plt.plot(prices, uts[i],label=cases[i])
+    plt.legend()
+    plt.show()
+
+
+
+
+
+
 def main():
 
     # test_max_allocation()
@@ -122,8 +198,10 @@ def main():
     # compare_SWs_and_SWp()
 
     # test_flow_restrict_allocation()
-    test_supply_restrict_allocation()
-
+    # test_supply_restrict_allocation()
+    # test_square_root_utility()
+    test_diff_utility()
+    # test_fig18()
     pass
 
 main()

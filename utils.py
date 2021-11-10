@@ -12,14 +12,35 @@ def orginal_utility(x,theta,b,d):
         return 0
     return theta*(x-b)+1
 
+def square_root_utility(x):
+    return np.sqrt(x)
+
+def diff_utility(case,x):
+    if case=='sqrt':
+        ut = np.sqrt(x)
+    if case=='log':
+        ut = np.log2(x+1)
+    if case=='sqrt3':
+        ut = x**(1/3)
+    if case=='sqrt4':
+        ut = x**(1/4)
+    if case=='sqrt5':
+        ut = x**(1/5)
+
+    return ut
+
+
 def get_nd(N,A,b,d,h,H_0):
     upper = 1/6*N*(N+1)*(2*N+1)*d**2+h
     lower = A*b**2+h
     xx=3*(H_0-h)/(2*A*d**2)+1/2*np.sqrt((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
     yy=3*(H_0-h)/(2*A*d**2)-1/2*np.sqrt((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
+    print((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
+    print(yy)
+
     y_d = xx**(1/3)+yy**(1/3)-1/2
-    # print(y_d)
-    # print(upper)
+    print(y_d)
+    print(upper)
     if H_0<lower:
         return 0
     else:
@@ -41,9 +62,36 @@ def get_n_b(N,A,b,h,H_0):
         return N
 
 
-def allocate_1(N,H_0,A,xs):
-    pass
+def algorithm_one(H_0, A, h, x_list):
+    num = len(x_list)
+    result = []
+    for i in range(num):
+        claim = x_list[i]
+        # for j in range(claim, 0, 0.0001):
+        # print(claim)
+        while claim >= 0:
+            current_cost = 0
+            for k in range(i+1):
+                total_sum = claim
+                for m in range(k,i):
+                    total_sum += result[m]
+                # print(total_sum)
+                current_cost += A * total_sum**2
+            # print(current_cost)
 
+            if current_cost <= H_0 - h:
+                result.append(claim)
+                break
+            claim -= 0.0001
+        if len(result) != i+1:
+            break
+            # result.append(0)
+        # print(result)
+    current_len = len(result)
+    for i in range(current_len,num):
+        result.append(0)
+    # print(len(result))
+    return result
 
 
 def I_2(q_d,b):
@@ -51,6 +99,24 @@ def I_2(q_d,b):
         return 0
     else:
         return 1
+
+
+def get_square_root_usage(demmand,H_0,N,h,A):
+    n_d = get_nd(N, A, 0, demmand, h, H_0)
+
+    q_d = -1 / 2 * demmand * n_d \
+          + np.sqrt(
+        -1 / 3 * demmand ** 2 * n_d * (n_d + 1) ** 2 * (n_d + 2) + 4 * (n_d + 1) * (H_0 - h) / A
+    ) / (2 * (n_d + 1))
+    usages=[demmand]*int(n_d)
+    print(usages)
+    usages.extend([q_d])
+    while len(usages)<=N:
+        usages.append(0)
+    return usages
+
+
+
 
 
 
@@ -144,3 +210,16 @@ def min_allocation(N, H_0, h, A, theta, b):
     n_b=get_n_b(N,A,b,h,H_0)
     return n_b
 
+def get_demmand(case,p):
+    if case=='sqrt':
+        demmand = 1/(4*p**2)
+    if case=='log':
+        demmand = 1./p-1
+    if case=='sqrt3':
+        demmand = (3*p)**(-3/2)
+    if case=='sqrt4':
+        demmand = (4*p)**(-4/3)
+    if case=='sqrt5':
+        demmand = (5*p)**(-5/4)
+
+    return demmand
