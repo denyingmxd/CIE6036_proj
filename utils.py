@@ -35,12 +35,12 @@ def get_nd(N,A,b,d,h,H_0):
     lower = A*b**2+h
     xx=3*(H_0-h)/(2*A*d**2)+1/2*np.sqrt((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
     yy=3*(H_0-h)/(2*A*d**2)-1/2*np.sqrt((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
-    print((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
-    print(yy)
+    # print((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
+    # print(yy)
 
     y_d = xx**(1/3)+yy**(1/3)-1/2
     print(y_d)
-    print(upper)
+    # print(upper)
     if H_0<lower:
         return 0
     else:
@@ -82,7 +82,7 @@ def algorithm_one(H_0, A, h, x_list):
             if current_cost <= H_0 - h:
                 result.append(claim)
                 break
-            claim -= 0.0001
+            claim -= 0.001
         if len(result) != i+1:
             break
             # result.append(0)
@@ -92,6 +92,7 @@ def algorithm_one(H_0, A, h, x_list):
         result.append(0)
     # print(len(result))
     return result
+
 
 
 def I_2(q_d,b):
@@ -146,7 +147,7 @@ def flow_restrict_allocation(N, H_0, h, A, theta, b,d,c):
         -1 / 3 * c ** 2 * n_c * (n_c + 1) ** 2 * (n_c + 2) + 4 * (n_c + 1) * (H_0 - h) / A
     ) / (2 * (n_c + 1))
 
-    if n_c==N:
+    if n_c>=N:
         SW_c=n_c*(1+theta*(c-b))
     if n_c<N and q_c<b:
         SW_c = n_c * (1 + theta * (c - b))
