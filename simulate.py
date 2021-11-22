@@ -2,7 +2,8 @@ import numpy as np
 from utils import orginal_utility,algorithm_one,\
     max_allocatin,min_allocation,optimal_allocation,pricing_allocation,\
     flow_restrict_allocation,square_root_utility,get_square_root_usage,\
-    get_demmand,diff_utility,get_nd
+    get_demmand,diff_utility,get_nd,polynomial_pricing_allocation,\
+    polynomial_mn_pricing_allocation
 import matplotlib.pyplot as plt
 
 
@@ -59,7 +60,7 @@ def compare_SWs_and_SWp():
     H_0 = 251.5
     h = 30
     A = 100
-    theta = 0.001
+    theta = 10
     b = 0.001
     d = 0.01
     alphas = np.arange(0.0,0.85,0.01)
@@ -69,7 +70,7 @@ def compare_SWs_and_SWp():
     for alpha in alphas:
         max_res = max_allocatin(N, H_0*(1-alpha), h, A, theta, b,d)
         optimal_res = optimal_allocation(N, H_0*(1-alpha), h, A, theta, b,d)
-        pricing_res = pricing_allocation(N, H_0*(1-alpha), h, A, theta, b,d,p=0.1)
+        pricing_res = pricing_allocation(N, H_0*(1-alpha), h, A, theta, b,d)
         print(max_res)
         print(optimal_res)
         print(pricing_res)
@@ -322,6 +323,89 @@ def test_Fig_19():
 
 
 
+def test_polynomial_pricing():
+    N = 40
+    H_0 = 251.5
+    h = 30
+    A = 100
+    theta = 10
+    b = 0.001
+    d = 0.01
+    alphas = np.arange(0.0, 0.85, 0.01)
+    max_ress = []
+    optimal_ress = []
+    pricing_ress = []
+    polynomial_ress = []
+    for alpha in alphas:
+        max_res = max_allocatin(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        optimal_res = optimal_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        pricing_res = pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        polynomial_res = polynomial_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+
+
+        print(max_res,optimal_res,pricing_res,polynomial_res)
+        # print()
+        # print()
+        # print(polynomial_res)
+        # exit()
+        pricing_ress.append(pricing_res)
+        max_ress.append(max_res)
+        optimal_ress.append(optimal_res)
+        polynomial_ress.append(polynomial_res)
+    max_ress = np.array(max_ress)
+    optimal_ress = np.array(optimal_ress)
+    polynomial_ress = np.array(polynomial_ress)
+    plt.plot(alphas, max_ress / optimal_ress)
+    plt.plot(alphas, pricing_ress / optimal_ress)
+    plt.plot(alphas, polynomial_ress / optimal_ress)
+    plt.show()
+    return 0
+
+def test_polynomial_pricing_mn():
+    N = 40
+    H_0 = 251.5
+    h = 30
+    A = 100
+    theta = 10
+    b = 0.001
+    d = 0.01
+    alphas = np.arange(0.0, 0.85, 0.01)
+    max_ress = []
+    optimal_ress = []
+    pricing_ress = []
+    polynomial_ress = []
+    polynomial_mn_ress = []
+    for alpha in alphas:
+        max_res = max_allocatin(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        optimal_res = optimal_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        pricing_res = pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        polynomial_res = polynomial_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        polynomial_mn_res = polynomial_mn_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        print(max_res, optimal_res, pricing_res, polynomial_res)
+        # print()
+        # print()
+        # print(polynomial_res)
+        # exit()
+        pricing_ress.append(pricing_res)
+        max_ress.append(max_res)
+        optimal_ress.append(optimal_res)
+        polynomial_ress.append(polynomial_res)
+        polynomial_mn_ress.append(polynomial_mn_res)
+    max_ress = np.array(max_ress)
+    optimal_ress = np.array(optimal_ress)
+    polynomial_ress = np.array(polynomial_ress)
+    polynomial_mn_ress = np.array(polynomial_mn_ress)
+    plt.plot(alphas, max_ress / optimal_ress)
+    plt.plot(alphas, pricing_ress / optimal_ress)
+    plt.plot(alphas, polynomial_ress / optimal_ress)
+    plt.plot(alphas, polynomial_mn_ress / optimal_ress)
+    plt.show()
+    return 0
+
+
+
+
+
 
 def main():
 
@@ -338,7 +422,12 @@ def main():
     # test_fig18()
 
     # test_Fig_10()
-    test_Fig_19()
+    # test_Fig_19()
+
+    # test_polynomial_pricing()
+    test_polynomial_pricing_mn()
+
+
     pass
 
 main()

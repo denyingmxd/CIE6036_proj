@@ -37,9 +37,12 @@ def get_nd(N,A,b,d,h,H_0):
     yy=3*(H_0-h)/(2*A*d**2)-1/2*np.sqrt((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
     # print((9*(H_0-h)**2)/(A**2*d**4) - 1/432)
     # print(yy)
-
-    y_d = xx**(1/3)+yy**(1/3)-1/2
-    print(y_d)
+    if yy<0.0000001:
+        yy=0
+        y_d = xx ** (1 / 3) + yy ** (1 / 3) - 1 / 2
+    else:
+        y_d = xx**(1/3)+yy**(1/3)-1/2
+    # print(d,y_d,xx,yy)
     # print(upper)
     if H_0<lower:
         return 0
@@ -116,12 +119,76 @@ def get_square_root_usage(demmand,H_0,N,h,A):
         usages.append(0)
     return usages
 
+def polynomial_pricing_allocation(N, H_0, h, A, theta, b, d):
+    SW=[]
+    pi_f = lambda f: 1+theta*(f-b)-m*f**2 if f>=b and f<=d else 0
+    for m in range(100,10000,10):
+        eq = theta/2./m
+        if eq<=b:
+            pi_b = pi_f(eq)
+            if pi_b>0:
+                demmand=b
+            else:
+                demmand=0
+        elif eq>b and eq<d:
+            pi_eq = pi_f(eq)
+            if pi_eq>0:
+                demmand=eq
+            else:
+                demmand=0
+        else:
+            pi_d = pi_f(d)
+            if pi_d > 0:
+                demmand = d
+            else:
+                demmand = 0
+        if demmand==0:
+            SW.append(0)
+            continue
+        aaa = flow_restrict_allocation(N, H_0, h, A, theta, b,d,demmand)
+        SW.append(aaa)
+        # print(m,aaa,demmand)
+    optimal = max(SW)
+    return optimal
+
+def polynomial_mn_pricing_allocation(N, H_0, h, A, theta, b, d):
+    SW=[]
+    pi_f = lambda f: 1+theta*(f-b)-(m*f**2+n*f) if f>=b and f<=d else 0
+    for m in range(100,10000,10):
+        for n in range(0,10):
+            eq = (theta-n)/(2*m)
+            if eq<=b:
+                pi_b = pi_f(eq)
+                if pi_b>0:
+                    demmand=b
+                else:
+                    demmand=0
+            elif eq>b and eq<d:
+                pi_eq = pi_f(eq)
+                if pi_eq>0:
+                    demmand=eq
+                else:
+                    demmand=0
+            else:
+                pi_d = pi_f(d)
+                if pi_d > 0:
+                    demmand = d
+                else:
+                    demmand = 0
+            if demmand==0:
+                SW.append(0)
+                continue
+            aaa = flow_restrict_allocation(N, H_0, h, A, theta, b,d,demmand)
+            SW.append(aaa)
+        # print(m,aaa,demmand)
+    optimal = max(SW)
+    return optimal
 
 
 
 
 
-def pricing_allocation(N,H_0,h,A,theta,b,d,p):
+def pricing_allocation(N,H_0,h,A,theta,b,d):
     n_b=get_n_b(N,A,b,h,H_0)
     n_d =get_nd(N,A,b,d,h,H_0)
     print(n_d,n_b)
@@ -148,11 +215,11 @@ def flow_restrict_allocation(N, H_0, h, A, theta, b,d,c):
     ) / (2 * (n_c + 1))
 
     if n_c>=N:
-        SW_c=n_c*(1+theta*(c-b))
+        SW_c=N*(1+theta*(c-b))
     if n_c<N and q_c<b:
         SW_c = n_c * (1 + theta * (c - b))
     if n_c<N and q_c>=b:
-        SW_c = SW_c=n_c*(1+theta*(c-b))+(1+theta*(q_c-b))
+        SW_c=n_c*(1+theta*(c-b))+(1+theta*(q_c-b))
     return SW_c
 
 
