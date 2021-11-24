@@ -151,8 +151,9 @@ def polynomial_pricing_allocation(N, H_0, h, A, theta, b, d):
     optimal = max(SW)
     return optimal
 
-def polynomial_mn_pricing_allocation(N, H_0, h, A, theta, b, d):
+def polynomial_mn_pricing_allocation(N, H_0, h, A, theta, b, d, return_pos=False):
     SW=[]
+    comb=[]
     pi_f = lambda f: 1+theta*(f-b)-(m*f**2+n*f) if f>=b and f<=d else 0
     for m in range(100,10000,10):
         for n in range(0,10):
@@ -180,9 +181,49 @@ def polynomial_mn_pricing_allocation(N, H_0, h, A, theta, b, d):
                 continue
             aaa = flow_restrict_allocation(N, H_0, h, A, theta, b,d,demmand)
             SW.append(aaa)
+            comb.append([m,n])
+        # print(m,aaa,demmand)
+    optimal = max(SW)
+    ind = np.argmax(SW)
+    optimal_base = comb[ind]
+    # print(optimal_base)
+    if return_pos:
+        return optimal,optimal_base
+    return optimal
+
+def polynomial_diff_mn_pricing_allocation(N, H_0, h, A, theta, b, d,ratio):
+    SW=[]
+    pi_f = lambda f: 1+theta*(f-b)-(m*f**2+n*f) if f>=b and f<=d else 0
+    for m in range(100,10000,10):
+        n = m*ratio
+        eq = (theta-n)/(2*m)
+        if eq<=b:
+            pi_b = pi_f(eq)
+            if pi_b>0:
+                demmand=b
+            else:
+                demmand=0
+        elif eq>b and eq<d:
+            pi_eq = pi_f(eq)
+            if pi_eq>0:
+                demmand=eq
+            else:
+                demmand=0
+        else:
+            pi_d = pi_f(d)
+            if pi_d > 0:
+                demmand = d
+            else:
+                demmand = 0
+        if demmand==0:
+            SW.append(0)
+            continue
+        aaa = flow_restrict_allocation(N, H_0, h, A, theta, b,d,demmand)
+        SW.append(aaa)
         # print(m,aaa,demmand)
     optimal = max(SW)
     return optimal
+
 
 
 

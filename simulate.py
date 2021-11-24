@@ -3,7 +3,7 @@ from utils import orginal_utility,algorithm_one,\
     max_allocatin,min_allocation,optimal_allocation,pricing_allocation,\
     flow_restrict_allocation,square_root_utility,get_square_root_usage,\
     get_demmand,diff_utility,get_nd,polynomial_pricing_allocation,\
-    polynomial_mn_pricing_allocation
+    polynomial_mn_pricing_allocation, polynomial_diff_mn_pricing_allocation
 import matplotlib.pyplot as plt
 
 
@@ -187,7 +187,7 @@ def test_diff_utility():
     plt.show()
 
 
-def test_Fig_10():
+def test_Fig_10(extend=False):
     A=100
     H_0=131
     h=30
@@ -198,6 +198,8 @@ def test_Fig_10():
     N=10
     theta1=1
     theta2s=np.arange(1,100,1)
+    if extend:
+        theta2s=np.arange(0,1,0.01)
 
     for d in ds:
         cs = np.arange(b, d, 0.002)
@@ -250,8 +252,9 @@ def test_Fig_10():
         pricing_uts=np.array(pricing_uts)
         quotient = resctrict_uts/pricing_uts
         qq.append(quotient)
-    plt.plot(theta2s,qq[0])
-    plt.plot(theta2s,qq[1])
+    plt.plot(theta2s,qq[0],label='d=0.07')
+    plt.plot(theta2s,qq[1],label='d=0.1')
+    plt.legend()
     plt.show()
 
 
@@ -336,44 +339,6 @@ def test_polynomial_pricing():
     optimal_ress = []
     pricing_ress = []
     polynomial_ress = []
-    for alpha in alphas:
-        max_res = max_allocatin(N, H_0 * (1 - alpha), h, A, theta, b, d)
-        optimal_res = optimal_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
-        pricing_res = pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
-        polynomial_res = polynomial_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
-
-
-        print(max_res,optimal_res,pricing_res,polynomial_res)
-        # print()
-        # print()
-        # print(polynomial_res)
-        # exit()
-        pricing_ress.append(pricing_res)
-        max_ress.append(max_res)
-        optimal_ress.append(optimal_res)
-        polynomial_ress.append(polynomial_res)
-    max_ress = np.array(max_ress)
-    optimal_ress = np.array(optimal_ress)
-    polynomial_ress = np.array(polynomial_ress)
-    plt.plot(alphas, max_ress / optimal_ress)
-    plt.plot(alphas, pricing_ress / optimal_ress)
-    plt.plot(alphas, polynomial_ress / optimal_ress)
-    plt.show()
-    return 0
-
-def test_polynomial_pricing_mn():
-    N = 40
-    H_0 = 251.5
-    h = 30
-    A = 100
-    theta = 10
-    b = 0.001
-    d = 0.01
-    alphas = np.arange(0.0, 0.85, 0.01)
-    max_ress = []
-    optimal_ress = []
-    pricing_ress = []
-    polynomial_ress = []
     polynomial_mn_ress = []
     for alpha in alphas:
         max_res = max_allocatin(N, H_0 * (1 - alpha), h, A, theta, b, d)
@@ -381,11 +346,6 @@ def test_polynomial_pricing_mn():
         pricing_res = pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
         polynomial_res = polynomial_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
         polynomial_mn_res = polynomial_mn_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
-        print(max_res, optimal_res, pricing_res, polynomial_res)
-        # print()
-        # print()
-        # print(polynomial_res)
-        # exit()
         pricing_ress.append(pricing_res)
         max_ress.append(max_res)
         optimal_ress.append(optimal_res)
@@ -402,9 +362,157 @@ def test_polynomial_pricing_mn():
     plt.show()
     return 0
 
+def test_polynomial_pricing_diff_mn():
+    N = 40
+    H_0 = 251.5
+    h = 30
+    A = 100
+    theta = 10
+    b = 0.001
+    d = 0.01
+    alphas = np.arange(0.0, 0.85, 0.01)
+    optimal_ress = []
+    n_m_ratio=np.arange(0,1./100,0.0001)
+    results=[[] for i in range(len(n_m_ratio))]
+    for alpha in alphas:
+        optimal_res = optimal_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        print(alpha)
+        for i,ratio in enumerate(n_m_ratio):
+            sub_res=polynomial_diff_mn_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d,ratio)
+            results[i].append(sub_res)
+        optimal_ress.append(optimal_res)
+        # print(optimal_res)
+    optimal_ress=np.array(optimal_ress)
+    results=np.array(results)
+    print(results.shape)
+    for i in range(len(results)):
+        plt.plot(results[i]/optimal_ress,label=str(n_m_ratio[i]))
+    plt.legend()
+    plt.show()
+    return 0
+
+def test_polynomial_pricing_find_mn():
+    N = 40
+    H_0 = 251.5
+    h = 30
+    A = 100
+    theta = 10
+    b = 0.001
+    d = 0.01
+    alphas = np.arange(0.0, 0.85, 0.01)
+    poss=[]
+    for alpha in alphas:
+        print(alpha)
+        polynomial_res,pos = polynomial_mn_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d,True)
+        poss.append(pos)
+    poss=np.array(poss)
+    # plt.plot(alphas,poss[:,0]/(poss[:,1]+0.01),label='ratio')
+    plt.plot(alphas,poss[:,0],label='m')
+    plt.plot(alphas,poss[:,1],label='n')
+    plt.legend()
+    plt.show()
+    return 0
+
+def test_polynomial_pricing_and_supply_restriction():
+    N = 40
+    H_0 = 251.5
+    h = 30
+    A = 100
+    theta = 10
+    b = 0.001
+    d = 0.01
+    alphas = np.arange(0.0, 0.85, 0.01)
+    poly_ress=[]
+    supply_restriction_ress=[]
+    optimal_ress=[]
+    cs=np.arange(b,d,0.0001)
+    for alpha in alphas:
+        poly_res = polynomial_pricing_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        sub_ress=[]
+        print(alpha)
+        optimal_res = optimal_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d)
+        for c in cs:
+            sub_res = flow_restrict_allocation(N, H_0 * (1 - alpha), h, A, theta, b, d,c)
+            sub_ress.append(sub_res)
+        supply_restriction_ress.append(max(sub_ress))
+        poly_ress.append(poly_res)
+        optimal_ress.append(optimal_res)
+    poly_ress=np.array(poly_ress)
+    supply_restriction_ress=np.array(supply_restriction_ress)
+    optimal_ress=np.array(optimal_ress)
+    plt.plot(alphas,poly_ress/optimal_ress,label='poly/optimal')
+    plt.plot(alphas,supply_restriction_ress/optimal_ress,label='supply/optimal')
+    plt.legend()
+    plt.show()
+
+
+def test_Fig_10_polynomial():
+    A = 100
+    H_0 = 131
+    h = 30
+    b = 0.01
+    d=0.07
+    qq = []
+    N = 10
+    theta1 = 1
+    theta2s = np.arange(1, 100, 1)
+    cs = np.arange(b, d, 0.002)
+    pricing_uts = []
+    resctrict_uts = []
+    for j in range(len(theta2s)):
+        theta2 = theta2s[j]
+        customer_demands = [b, d] * (N // 2)
+        thetas = [theta1, theta2] * (N // 2)
+        allocated = algorithm_one(H_0, A, h, customer_demands)
+        utility = np.sum([orginal_utility(allocated[i], thetas[i], b, d) for i in range(len(allocated))])
+        pricing_uts.append(utility)
+
+        rr = []
+        for c in cs:
+            n_c = int(get_nd(N, A, b, c, h, H_0))
+            # print('max allocation with c:',n_c)
+            q_c = -1 / 2 * c * n_c \
+                  + np.sqrt(
+                -1 / 3 * c ** 2 * n_c * (n_c + 1) ** 2 * (n_c + 2) + 4 * (n_c + 1) * (H_0 - h) / A
+            ) / (2 * (n_c + 1))
+            res = 0
+            print(n_c)
+            if n_c >= N:
+                for i in range(N):
+                    if i % 2 == 0:
+                        res += 1 + theta1 * (c - b)
+                    else:
+                        res += 1 + theta2 * (c - b)
+            else:
+                for i in range(n_c):
+                    if i % 2 == 0:
+                        res += 1 + theta1 * (c - b)
+                    else:
+                        res += 1 + theta2 * (c - b)
+                if n_c % 2 == 0:
+                    if q_c < b:
+                        res += 0
+                    else:
+                        res += 1 + theta1 * (q_c - b)
+                else:
+                    if q_c < b:
+                        res += 0
+                    else:
+                        res += 1 + theta2 * (q_c - b)
+            rr.append(res)
+        optimal_restrict = max(rr)
+        resctrict_uts.append(optimal_restrict)
 
 
 
+    resctrict_uts = np.array(resctrict_uts)
+    pricing_uts = np.array(pricing_uts)
+    quotient = resctrict_uts / pricing_uts
+    qq.append(quotient)
+    plt.plot(theta2s, qq[0], label='d=0.07')
+    plt.plot(theta2s, qq[1], label='d=0.1')
+    plt.legend()
+    plt.show()
 
 
 def main():
@@ -422,12 +530,15 @@ def main():
     # test_fig18()
 
     # test_Fig_10()
+    # test_Fig_10(extend=True)
     # test_Fig_19()
 
     # test_polynomial_pricing()
-    test_polynomial_pricing_mn()
+    # test_polynomial_pricing_diff_mn()
+    # test_polynomial_pricing_find_mn()
+    # test_polynomial_pricing_and_supply_restriction()
 
-
+    test_Fig_10_polynomial()
     pass
 
 main()
