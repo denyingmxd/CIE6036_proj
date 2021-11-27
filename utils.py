@@ -119,10 +119,11 @@ def get_square_root_usage(demmand,H_0,N,h,A):
         usages.append(0)
     return usages
 
-def polynomial_pricing_allocation(N, H_0, h, A, theta, b, d):
+def polynomial_pricing_allocation(N, H_0, h, A, theta, b, d,heterogeneou=False):
     SW=[]
     pi_f = lambda f: 1+theta*(f-b)-m*f**2 if f>=b and f<=d else 0
-    for m in range(100,10000,10):
+    ms = range(100,10000,10)
+    for m in ms:
         eq = theta/2./m
         if eq<=b:
             pi_b = pi_f(eq)
@@ -150,6 +151,57 @@ def polynomial_pricing_allocation(N, H_0, h, A, theta, b, d):
         # print(m,aaa,demmand)
     optimal = max(SW)
     return optimal
+
+def poly_demmands(N, H_0, h, A, theta1,theta2, b, d):
+    SW=[]
+    pi_f_1 = lambda f: 1+theta1*(f-b)-m*f**2 if f>=b and f<=d else 0
+    pi_f_2 = lambda f: 1+theta2*(f-b)-m*f**2 if f>=b and f<=d else 0
+    ms = range(1,10000,1)
+    demands=[]
+    for m in ms:
+        eq1 = theta1/2./m
+        eq2 = theta2/2./m
+        if eq1<=b:
+            pi_b = pi_f_1(eq1)
+            if pi_b>0:
+                demmand1=b
+            else:
+                demmand1=0
+        elif eq1>b and eq1<d:
+            pi_eq = pi_f_1(eq1)
+            if pi_eq>0:
+                demmand1=eq1
+            else:
+                demmand1=0
+        else:
+            pi_d = pi_f_1(d)
+            if pi_d > 0:
+                demmand1 = d
+            else:
+                demmand1 = 0
+       ##---------------------------
+        if eq2<=b:
+            pi_b = pi_f_2(eq2)
+            if pi_b>0:
+                demmand2=b
+            else:
+                demmand2=0
+        elif eq2>b and eq2<d:
+            pi_eq = pi_f_2(eq2)
+            if pi_eq>0:
+                demmand2=eq2
+            else:
+                demmand2=0
+        else:
+            pi_d = pi_f_2(d)
+            if pi_d > 0:
+                demmand2 = d
+            else:
+                demmand2 = 0
+        # print(m,aaa,demmand)
+        demands.append([demmand1,demmand2]*5)
+    return demands
+
 
 def polynomial_mn_pricing_allocation(N, H_0, h, A, theta, b, d, return_pos=False):
     SW=[]
