@@ -122,7 +122,7 @@ def get_square_root_usage(demmand,H_0,N,h,A):
 def polynomial_pricing_allocation(N, H_0, h, A, theta, b, d,heterogeneou=False):
     SW=[]
     pi_f = lambda f: 1+theta*(f-b)-m*f**2 if f>=b and f<=d else 0
-    ms = range(100,10000,10)
+    ms = range(100,10000,1)
     for m in ms:
         eq = theta/2./m
         if eq<=b:
@@ -156,7 +156,7 @@ def poly_demmands(N, H_0, h, A, theta1,theta2, b, d):
     SW=[]
     pi_f_1 = lambda f: 1+theta1*(f-b)-m*f**2 if f>=b and f<=d else 0
     pi_f_2 = lambda f: 1+theta2*(f-b)-m*f**2 if f>=b and f<=d else 0
-    ms = range(1,10000,1)
+    ms = range(1,10000,10)
     demands=[]
     for m in ms:
         eq1 = theta1/2./m

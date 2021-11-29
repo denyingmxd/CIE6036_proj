@@ -332,10 +332,13 @@ def test_polynomial_pricing():
     optimal_ress = np.array(optimal_ress)
     polynomial_ress = np.array(polynomial_ress)
     polynomial_mn_ress = np.array(polynomial_mn_ress)
-    plt.plot(alphas, max_ress / optimal_ress)
-    plt.plot(alphas, pricing_ress / optimal_ress)
-    plt.plot(alphas, polynomial_ress / optimal_ress)
-    plt.plot(alphas, polynomial_mn_ress / optimal_ress)
+    plt.plot(alphas, max_ress / optimal_ress,label='$SW_{s}^{*}/SW^{*}$')
+    plt.plot(alphas, pricing_ress / optimal_ress,label='$SW_{LP}^{*}/SW^{*}$')
+    plt.plot(alphas, polynomial_ress / optimal_ress,label='$SW_{PP}^{*}/SW^{*}$')
+    # plt.plot(alphas, polynomial_mn_ress / optimal_ress)
+    plt.xlabel('Percentage head drop')
+    plt.ylabel('Performance ratio')
+    plt.legend()
     plt.show()
     return 0
 
@@ -363,8 +366,10 @@ def test_polynomial_pricing_diff_mn():
     results=np.array(results)
     print(results.shape)
     for i in range(len(results)):
-        plt.plot(results[i]/optimal_ress,label=str(n_m_ratio[i]))
+        plt.plot(results[i]/optimal_ress,label=str(n_m_ratio[i])[:5])
     plt.legend()
+    plt.xlabel('Percentage head drop')
+    plt.ylabel('Performance ratio')
     plt.show()
     return 0
 
@@ -384,8 +389,8 @@ def test_polynomial_pricing_find_mn():
         poss.append(pos)
     poss=np.array(poss)
     # plt.plot(alphas,poss[:,0]/(poss[:,1]+0.01),label='ratio')
-    plt.plot(alphas,poss[:,0],label='m')
-    plt.plot(alphas,poss[:,1],label='n')
+    plt.plot(alphas,poss[:,0],label='m',color='r')
+    # plt.plot(alphas,poss[:,1],label='n')
     plt.legend()
     plt.show()
     return 0
@@ -417,9 +422,12 @@ def test_polynomial_pricing_and_supply_restriction():
     poly_ress=np.array(poly_ress)
     supply_restriction_ress=np.array(supply_restriction_ress)
     optimal_ress=np.array(optimal_ress)
-    plt.plot(alphas,poly_ress/optimal_ress,label='poly/optimal')
-    plt.plot(alphas,supply_restriction_ress/optimal_ress,label='supply/optimal')
+    plt.title('control precision 0.0001')
+    plt.plot(alphas,poly_ress/optimal_ress,label='$SW_{PP}^{*}/SW^{*}$')
+    plt.plot(alphas,supply_restriction_ress/optimal_ress,label='$SW_{C}^{*}/SW^{*}$')
     plt.legend()
+    plt.xlabel('Percentage head drop')
+    plt.ylabel('Performance ratio')
     plt.show()
 
 
@@ -428,15 +436,12 @@ def test_Fig_10_polynomial(minor=False):
     H_0 = 131
     h = 30
     b = 0.01
-    heteogeneous=True
-    # ds = [0.07, 0.1]
     d=0.1
-    qq = []
     N = 10
     theta1 = 1
     theta2s = np.arange(2, 100, 2)
     if minor:
-        theta2s = np.arange(0.2, 1, 0.02)
+        theta2s = np.arange(0.3, 1, 0.02)
 
 
     cs = np.arange(b, d, 0.002)
@@ -508,10 +513,18 @@ def test_Fig_10_polynomial(minor=False):
     resctrict_uts = np.array(resctrict_uts)
     pricing_uts = np.array(pricing_uts)
     poly_uts=np.array(poly_uts)
-    plt.plot(theta2s, resctrict_uts, label='restrict')
-    plt.plot(theta2s, pricing_uts,label='linear pricing')
-    plt.plot(theta2s, poly_uts,label='poly')
+    if minor:
+        plt.plot(theta2s, pricing_uts / resctrict_uts, label='$SW_{LP}^{*}/SW_{C}^{*}$')
+    else:
+        plt.plot(theta2s, resctrict_uts/pricing_uts, label='$SW_{C}^{*}/SW_{LP}^{*}$')
+    # plt.plot(theta2s, pricing_uts,label='linear pricing')
+    if minor:
+        plt.plot(theta2s, poly_uts/resctrict_uts,label='$SW_{PP}^{*}/SW_{C}^{*}$')
+    else:
+        plt.plot(theta2s, poly_uts/pricing_uts,label='$SW_{PP}^{*}/SW_{LP}^{*}$')
     plt.legend()
+    plt.xlabel('$\Theta_2/\Theta_1$')
+    plt.ylabel('Performance ratio')
     plt.show()
 
 
@@ -533,12 +546,12 @@ def main():
 
 
 
-    # test_polynomial_pricing()
+    test_polynomial_pricing()
     # test_polynomial_pricing_diff_mn()
     # test_polynomial_pricing_find_mn()
     # test_polynomial_pricing_and_supply_restriction()
 
-    test_Fig_10_polynomial()
+    test_Fig_10_polynomial(1)
     pass
 
 main()
